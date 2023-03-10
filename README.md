@@ -12,14 +12,6 @@ To install the application, simply clone the repository and run npm install to i
 
 To start the application, run npm start-dev and navigate to localhost:8080 in your browser. Grant access to your webcam when prompted and wait for the emotion detection process to start. Follow the on-screen instructions to generate images that correspond to your emotions.
 
-### OAuth
-
-* To use OAuth with Google, complete the steps above with a real client
-  ID and client secret supplied from Google
-  * You can get them from the [Google APIs dashboard][google-apis].
-
-[google-apis]: https://console.developers.google.com/apis/credentials
-
 ## Contributing
 
 If you would like to contribute to the project, please fork the repository and submit a pull request with your changes. Before submitting a pull request, make sure to run npm run lint-fix to fix any linting errors.
