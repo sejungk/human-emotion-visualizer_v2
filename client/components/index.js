@@ -4,8 +4,8 @@
  * having to figure out which file they belong to!
  */
 
-import { applyActivation } from '@tensorflow/tfjs-core/dist/ops/fused_util'
-import { models } from '@tensorflow/tfjs-layers'
-import { Store } from 'express-session'
+import {applyActivation} from '@tensorflow/tfjs-core/dist/ops/fused_util'
+import {models} from '@tensorflow/tfjs-layers'
+import {Store} from 'express-session'
 
 export {default as FaceRecognition} from './face-recognition'
