@@ -1,7 +1,7 @@
-import React, {useEffect, useRef} from 'react'
-import * as faceapi from 'face-api.js'
-import * as p5 from 'p5'
-import {loadModels} from './models.js'
+import React, {useEffect, useRef} from 'react';
+import * as faceapi from 'face-api.js';
+import * as p5 from 'p5';
+import {loadModels} from './models.js';
 
 const emotionImages = {
   neutral: [
