@@ -1,4 +1,4 @@
-import * as faceapi from 'face-api.js'
+import * as faceapi from 'face-api.js';
 
 export const loadModels = async () => {
   await Promise.all([
