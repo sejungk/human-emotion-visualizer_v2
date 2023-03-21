@@ -1,8 +1,9 @@
 html,
 body {
   background-color: #000;
-  font-size: 2px;
+  /* font-size: 2px; */
   line-height: 100%;
+  font-size: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,17 +18,8 @@ div {
 
 /* pixel */
 img:not(#image) {
-  width: 3vw;
-}
-
-/* cat img */
-#emotion-image {
-  top: 0;
-  left: 0;
-  width: 20vw !important;
-  height: auto;
-  position: absolute;
-  display: none;
+  width: 3.3vw;
+  height: 3.3vw;
 }
 
 #video,
