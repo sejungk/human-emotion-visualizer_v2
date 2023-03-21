@@ -1,4 +1,4 @@
-html, body {
+/* html, body {
   background-color: #000;
   line-height: 100%;
   font-size: 2px;
@@ -17,6 +17,46 @@ div {
 img:not(#image) {
   width: 3.3vw;
   height: 3.3vw;
+}
+
+#video,
+canvas {
+  display: block;
+  width: 100vw;
+  position: absolute;
+  left: 0;
+  top: 35%;
+}
+
+#video {
+  left: 0;
+  top: 0;
+} */
+html, body {
+  background-color: #000;
+  line-height: 100%;
+  font-size: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+div {
+  position: absolute;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+img:not(#image) {
+  width: 3.3vw;
+  height: 3.3vw;
+  margin: 0;
+  padding: 0;
 }
 
 #video,
