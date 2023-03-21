@@ -5,32 +5,45 @@ import {loadModels} from './models.js';
 import emotionImages from './emotionImages'
 
 const App = () => {
-  let video = useRef(null)
-  let pixelDiv
-  const VIDEO = p5.VIDEO
-  let currentEmotion = 'neutral'
-  let emotionConfidence = 0
-  let videoElem
-  let videoPromise
-  let emotionImage = useRef('')
+  let video = useRef(null);
+  let pixelDiv;
+  const VIDEO = p5.VIDEO;
+  let currentEmotion = 'neutral';
+  let emotionConfidence = 0;
+  let videoElem;
+  let videoPromise;
+  let emotionImage = useRef('');
 
   const setup = p5 => {
-    p5.noCanvas()
-    video = p5.createCapture({video: true, audio: false})
-    videoElem = video.elt
-    video.size(40, 45)
-    video.hide()
-    pixelDiv = p5.createDiv()
+    p5.noCanvas();
+    video = p5.createCapture({video: true, audio: false});
+    videoElem = video.elt;
+    video.size(20, 20);
+    video.hide();
+    pixelDiv = p5.createDiv();
 
     // Create the promise and resolve it when the video element is ready
     videoPromise = new Promise((resolve, reject) => {
       video.elt.onloadeddata = () => {
-        resolve()
+        resolve();
       }
       video.elt.addEventListener('loadedmetadata', () => {
-        startVideo()
+        startVideo();
       })
     })
+  }
+  const updateEmotion = (expression) => {
+    let highestEmotion = 'neutral'
+    let highestConfidence = 0
+    for (const [expressionName, expressionValue] of Object.entries(expression)) {
+      if (expressionValue > highestConfidence) {
+        highestEmotion = expressionName
+        highestConfidence = expressionValue
+      }
+    }
+    currentEmotion = highestEmotion
+    emotionConfidence = highestConfidence
+    console.log(currentEmotion)
   }
 
   const draw = p5 => {
@@ -70,13 +83,7 @@ const App = () => {
       // get the highest scored expression
       if (resizedDetections.length > 0) {
         const expression = resizedDetections[0].expressions;
-
-        for (const [expressionName, expressionValue] of Object.entries(expression)) {
-          if (expressionValue > emotionConfidence) {
-            currentEmotion = expressionName;
-            emotionConfidence = expressionValue;
-          }
-        }
+        updateEmotion(expression);
       }
     }, 100);
   }
