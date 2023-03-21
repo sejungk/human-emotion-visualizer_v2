@@ -371,10 +371,10 @@ const App = () => {
         const b = video.pixels[pixelIndex + 2]
         const avg = (r + g + b) / 3
         // const len = emotionImages[currentEmotion].length
-        const len = emotionImages['disgusted'].length
+        const len = emotionImages.disgusted.length
         const charIndex = Math.floor(p5.map(avg, 0, 255, 0, len))
         // const image = emotionImages[currentEmotion][charIndex]
-        const image = emotionImages['disgusted'][charIndex]
+        const image = emotionImages.disgusted[charIndex]
         emotionImage += `<img src="${image}">`
       }
       emotionImage += '<br/>'
