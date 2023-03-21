@@ -15,17 +15,11 @@
     "lint-fix": "npm run lint -- --fix",
     "prepare": "if [ -d .git ]; then npm-merge-driver install; fi",
     "prettify": "prettier --write \"**/*.{js,jsx,json,css,scss,md}\"",
-    "postinstall": "touch secrets.js",
     "seed": "node script/seed.js",
     "start": "node server",
     "start-dev": "NODE_ENV='development' npm run build-client-watch & NODE_ENV='development' npm run start-server",
     "start-server": "nodemon server -e html,js,scss --ignore public --ignore client",
     "test": "NODE_ENV='test' mocha \"./server/**/*.spec.js\" \"./client/**/*.spec.js\" \"./script/**/*.spec.js\" --require @babel/polyfill --require @babel/register"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "*.{js,jsx}": [
@@ -56,8 +50,6 @@
     "nodemon": "^2.0.21",
     "os-locale": "^6.0.2",
     "p5": "^1.6.0",
-    "passport": "^0.6.0",
-    "passport-google-oauth": "^2.0.0",
     "pg": "^8.10.0",
     "pg-hstore": "^2.3.4",
     "prop-types": "^15.8.1",
@@ -69,8 +61,6 @@
     "redux": "^4.2.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.4.2",
-    "sequelize": "^6.29.3",
-    "socket.io": "^2.5.0",
     "webpack": "^5.31.2",
     "y18n": "^3.2.2"
   },
