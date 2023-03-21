@@ -6,11 +6,12 @@ module.exports = app
 
 const createApp = () => {
   // static file-serving middleware
-  // app.use(express.static(path.join(__dirname, '..', 'public')))
-  app.use(express.static(__dirname + '/../public'))
+  app.use(express.static(path.join(__dirname, '..', 'public')))
+  // app.use(express.static(__dirname + '/../public'))
   // sends index.html
   app.use('*', (req, res) => {
-    res.sendFile(__dirname + '/../public/index.html')
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    // res.sendFile(__dirname + '/../public/index.html')
   })
 
   // error handling endware
