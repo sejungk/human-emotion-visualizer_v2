@@ -10,7 +10,7 @@ const createApp = () => {
   // app.use(express.static(__dirname + '/../public'))
   // sends index.html
   app.use('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
     // res.sendFile(__dirname + '/../public/index.html')
   })
 
