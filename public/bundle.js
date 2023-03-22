@@ -851,7 +851,8 @@ var App = function App() {
   var emotionConfidence = 0;
   var videoElem;
   var videoPromise;
-  var emotionImage = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)('');
+  var emotionImagePool = [];
+  var emotionImageIndex = 0;
   var setup = function setup(p5) {
     p5.noCanvas();
     video = p5.createCapture({
@@ -872,6 +873,14 @@ var App = function App() {
         startVideo();
       });
     });
+
+    // Create a pool of image elements
+    for (var i = 0; i < 100; i++) {
+      var img = document.createElement('img');
+      img.style.display = 'none';
+      pixelDiv.elt.appendChild(img);
+      emotionImagePool.push(img);
+    }
   };
   var updateEmotion = function updateEmotion(expression) {
     var highestEmotion = 'neutral';
@@ -891,7 +900,8 @@ var App = function App() {
   };
   var draw = function draw(p5) {
     video.loadPixels();
-    emotionImage = '';
+    var emotionImagePool = _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion];
+    var emotionImageIndex = 0;
     for (var j = 0; j < video.height; j++) {
       for (var i = 0; i < video.width; i++) {
         var pixelIndex = (i + j * video.width) * 4;
@@ -899,14 +909,17 @@ var App = function App() {
         var g = video.pixels[pixelIndex + 1];
         var b = video.pixels[pixelIndex + 2];
         var avg = (r + g + b) / 3;
-        var len = _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion].length;
+        var len = emotionImagePool.length;
         var charIndex = Math.floor(p5.map(avg, 0, 255, 0, len));
-        var image = _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion][charIndex];
-        emotionImage += "<img src=\"".concat(image, "\">");
+        var img = emotionImagePool[emotionImageIndex] || document.createElement('img');
+        img.src = emotionImagePool[charIndex];
+        emotionImageIndex++;
+        pixelDiv.child(img);
       }
-      emotionImage += '<br/>';
+      emotionImageIndex++;
+      var lineBreak = document.createElement('br');
+      pixelDiv.child(lineBreak);
     }
-    pixelDiv.html(emotionImage);
   };
   function startVideo() {
     return _startVideo.apply(this, arguments);
