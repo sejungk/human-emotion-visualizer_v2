@@ -1,14 +1,17 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import * as faceapi from 'face-api.js';
 import * as p5 from 'p5';
 import {loadModels} from './models.js';
-import emotionImages from './emotionImages'
+import emotionImages from './emotionImages';
+import LoadingPage from "./loader";
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
   let video = useRef(null);
   let pixelDiv;
   const VIDEO = p5.VIDEO;
-  let currentEmotion = 'neutral';
+  let currentEmotion = '';
   let emotionConfidence = 0;
   let videoElem;
   let videoPromise;
@@ -54,9 +57,14 @@ const App = () => {
     currentEmotion = highestEmotion;
     emotionConfidence = highestConfidence;
     console.log(currentEmotion);
+    setShowVideo(true);
   };
 
   const draw = p5 => {
+    if (!currentEmotion) {
+      return;
+    }
+
     video.loadPixels();
     const len = emotionImages[currentEmotion].length;
     for (let j = 0; j < video.height; j++) {
@@ -118,7 +126,13 @@ const App = () => {
       })
     })
   }, [])
-  return <div/>
+  // return <div/>
+  return  (
+    <>
+     {isLoading ? <LoadingPage /> : <div></div>}
+  </>
+  )
+  // return  <LoadingPage />
 }
 
 export default App

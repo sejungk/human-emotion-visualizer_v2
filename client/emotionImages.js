@@ -36,7 +36,6 @@ const emotionImages = {
     'https://www.realmofhistory.com/wp-content/uploads/2017/01/10-facial-reconstructions-history-min.jpg',
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSShpwvzxSpWyxJ14Dx2FaSGmvZMo3_q6sLIw&usqp=CAU',
     'https://tisch.nyu.edu/content/dam/tisch/photo/News/2021-06/aem-federal-hall-women-in-the-face-of-history.JPG.precrop.46,43,1175,776.xjpeg',
-    'https://www.history.com/.image/ar_16:9%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cq_auto:good%2Cw_1200/MTg3MTgyMzM0ODMzODYyNTQy/lincoln-gettyimages-90735089.jpg',
     'https://images.thenorthface.com/is/image/TheNorthFaceBrand/210930-about-us-history-1969-img-right-desktop?wid=1550&qlt=85',
     'https://assets1.cbsnewsstatic.com/hub/i/r/2011/01/31/2a016a17-4691-47b9-b854-1e838933a97b/thumbnail/640x481/b93510c95ce4d74f0c5a84683aa10e08/bookertwashington.jpg',
     'https://collectionapi.metmuseum.org/api/collection/v1/iiif/470557/945436/main-image',
