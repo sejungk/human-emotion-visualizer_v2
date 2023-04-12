@@ -4,6 +4,7 @@ import * as p5 from 'p5';
 import {loadModels} from './models.js';
 import emotionImages from './emotionImages';
 import LoadingPage from "./loader";
+document.cookie = 'cookieName=cookieValue; SameSite=None; Secure';
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -17,6 +18,92 @@ const App = () => {
   let videoPromise;
   let emotionImagePool = [];
   let emotionImageIndex = 0;
+
+  // async function calculateBrightness(imageSrc) {
+  //   return new Promise(resolve => {
+  //     const url = imageSrc;
+  //     const corsImageModified = new Image();
+  //     corsImageModified.crossOrigin = "Anonymous";
+  //     corsImageModified.src = url + "?not-from-cache-please";
+  //     corsImageModified.onload = function() {
+  //       const canvas = document.createElement("canvas");
+  //       canvas.width = this.width;
+  //       canvas.height = this.height;
+  //       const ctx = canvas.getContext("2d");
+  //       ctx.drawImage(this, 0, 0);
+
+  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  //       const data = imageData.data;
+  //       let r, g, b, avg;
+  //       let colorSum = 0;
+
+  //       for(let x=0, len=data.length; x<len; x+=4) {
+  //         r = data[x];
+  //         g = data[x+1];
+  //         b = data[x+2];
+  //         avg = Math.floor((r+g+b) / 3);
+  //         colorSum += avg;
+  //       }
+
+  //       const brightness = Math.floor(colorSum / (this.width * this.height));
+  //       resolve(brightness);
+  //     };
+  //   });
+  // }
+
+  // async function calculateAllBrightness() {
+  //   const sortedImagesObject = {}; // Create an empty object to store sorted arrays
+
+
+  //   for (const emotion in emotionImages) {
+  //     const images = emotionImages[emotion];
+  //     const sortedImages = await Promise.all(images.map(async (url) => {
+  //       const brightness = await calculateBrightness(url);
+  //       return { url, brightness };
+  //     })).then((result) => {
+  //       // Sort the images array based on brightness, from dark to light
+  //       result.sort((a, b) => a.brightness - b.brightness);
+  //       return result;
+  //     });
+
+  //     sortedImagesObject[emotion] = sortedImages
+  //       .filter(image => image.url.includes(emotion))
+  //       .map(image => image.url); // Update the filtered array to only contain image URLs
+
+  //     console.log(`Images for emotion "${emotion}" sorted by brightness:`);
+  //     console.log(sortedImages);
+  //   }
+
+  //   const copyButton = document.createElement("button");
+  //   copyButton.textContent = "Copy Sorted Images Object";
+  //   document.body.appendChild(copyButton);
+
+  //   copyButton.addEventListener("click", function() {
+  //       // Convert the sortedImagesObject to a string
+  //       const sortedImagesObjectString = JSON.stringify(sortedImagesObject);
+
+  //       // Create a textarea element to hold the sortedImagesObjectString
+  //       const textarea = document.createElement("textarea");
+  //       textarea.value = sortedImagesObjectString;
+  //       document.body.appendChild(textarea);
+
+  //       // Select the text in the textarea
+  //       textarea.select();
+  //       textarea.setSelectionRange(0, 99999);
+
+  //       // Copy the selected text to the clipboard
+  //       document.execCommand('copy');
+
+  //       // Remove the textarea element
+  //       document.body.removeChild(textarea);
+
+  //       // Alert that the object has been copied to the clipboard
+  //       alert("Sorted Images Object has been copied to the clipboard!");
+  //   });
+  // }
+
+  // calculateAllBrightness(); // Call the function to calculate all brightness values and create the copy button
+
 
   const setup = p5 => {
     p5.noCanvas();
@@ -126,13 +213,11 @@ const App = () => {
       })
     })
   }, [])
-  // return <div/>
   return  (
     <>
      {isLoading ? <LoadingPage /> : <div></div>}
-  </>
+    </>
   )
-  // return  <LoadingPage />
 }
 
 export default App
