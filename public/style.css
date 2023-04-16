@@ -7,9 +7,10 @@ html, body {
   align-items: center;
   height: 100vh;
   width: 100vw;
+  overflow-x: hidden;
 }
 
-div {
+.app div, .app {
   position: absolute;
   left: 0;
   display: flex;
@@ -17,10 +18,9 @@ div {
   justify-content: flex-start;
   align-items: flex-start;
 }
-
-img:not(#image) {
-  width: 3.3vw;
-  height: 3.3vw;
+.image-grid img {
+  width: 15px;
+  height: 15px;
   margin: 0;
   padding: 0;
 }
@@ -39,28 +39,72 @@ canvas {
   top: 0;
 }
 
-/* loader */
-@keyframes spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 10px solid #f3f3f3; /* Light grey */
-  border-top: 10px solid #383636; /* Blue */
-  border-radius: 50%;
-  animation: spinner 1.5s linear infinite;
-}
-
-.spinner-container {
-  display: grid;
+/* styles.css */
+.loading-page {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100%;
+  height: 100vh;
+  width: 100vw;
+}
+
+.loading-container_text {
+  text-align: center;
+  color: white;
+  font-family: 'Pixer';
+  width: 100vw;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  display: block;
+}
+
+.loading-container_text h1 {
+  font-size: 45px;
+  letter-spacing: 2px;
+}
+
+.loading-container_text p {
+  font-size: 12px;
+  letter-spacing: .5px;
+  padding-top: 40px;
+}
+
+.loading-dots_container {
+  display: flex;
+  width: 160px;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+
+.loading-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #fff; /* Initial background color for dots */
+}
+
+.loading-dot-fill {
+  background-image: url('images/emotion-icons/angry.png'); /* Image to be displayed on filled dots */
+  background-size: cover;
+  background-color: transparent;
+  animation-name: dot-fill-animation;
+}
+
+@keyframes dot-fill-animation {
+  from {
+    background-color: #fff; /* Initial background color for dots */
+  }
+  to {
+    background-image: url('images/emotion-icons/angry.png'); /* Image to be displayed on filled dots */
+    background-size: cover;
+    background-color: transparent;
+  }
+}
+
+.loading-page {
+  background-color: #000;
+  width: 110vw;
+  height: 110vh;
 }

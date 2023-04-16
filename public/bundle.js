@@ -845,109 +845,19 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
-document.cookie = 'cookieName=cookieValue; SameSite=None; Secure';
+var video = document.getElementById('video');
+var image = document.getElementById('emotion-image');
+var currentEmotion = 'neutral';
+var emotionConfidence = 0;
+var imagePixelDiv;
+var videoElem;
+var videoPromise;
 var App = function App() {
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
     _useState2 = _slicedToArray(_useState, 2),
     isLoading = _useState2[0],
     setIsLoading = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState4 = _slicedToArray(_useState3, 2),
-    showVideo = _useState4[0],
-    setShowVideo = _useState4[1];
-  var video = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var pixelDiv;
-  var VIDEO = p5__WEBPACK_IMPORTED_MODULE_2__.VIDEO;
-  var currentEmotion = '';
-  var emotionConfidence = 0;
-  var videoElem;
-  var videoPromise;
-  var emotionImagePool = [];
-  var emotionImageIndex = 0;
-
-  // async function calculateBrightness(imageSrc) {
-  //   return new Promise(resolve => {
-  //     const url = imageSrc;
-  //     const corsImageModified = new Image();
-  //     corsImageModified.crossOrigin = "Anonymous";
-  //     corsImageModified.src = url + "?not-from-cache-please";
-  //     corsImageModified.onload = function() {
-  //       const canvas = document.createElement("canvas");
-  //       canvas.width = this.width;
-  //       canvas.height = this.height;
-  //       const ctx = canvas.getContext("2d");
-  //       ctx.drawImage(this, 0, 0);
-
-  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  //       const data = imageData.data;
-  //       let r, g, b, avg;
-  //       let colorSum = 0;
-
-  //       for(let x=0, len=data.length; x<len; x+=4) {
-  //         r = data[x];
-  //         g = data[x+1];
-  //         b = data[x+2];
-  //         avg = Math.floor((r+g+b) / 3);
-  //         colorSum += avg;
-  //       }
-
-  //       const brightness = Math.floor(colorSum / (this.width * this.height));
-  //       resolve(brightness);
-  //     };
-  //   });
-  // }
-
-  // async function calculateAllBrightness() {
-  //   const sortedImagesObject = {}; // Create an empty object to store sorted arrays
-
-  //   for (const emotion in emotionImages) {
-  //     const images = emotionImages[emotion];
-  //     const sortedImages = await Promise.all(images.map(async (url) => {
-  //       const brightness = await calculateBrightness(url);
-  //       return { url, brightness };
-  //     })).then((result) => {
-  //       // Sort the images array based on brightness, from dark to light
-  //       result.sort((a, b) => a.brightness - b.brightness);
-  //       return result;
-  //     });
-
-  //     sortedImagesObject[emotion] = sortedImages
-  //       .filter(image => image.url.includes(emotion))
-  //       .map(image => image.url); // Update the filtered array to only contain image URLs
-
-  //     console.log(`Images for emotion "${emotion}" sorted by brightness:`);
-  //     console.log(sortedImages);
-  //   }
-
-  //   const copyButton = document.createElement("button");
-  //   copyButton.textContent = "Copy Sorted Images Object";
-  //   document.body.appendChild(copyButton);
-
-  //   copyButton.addEventListener("click", function() {
-  //       // Convert the sortedImagesObject to a string
-  //       const sortedImagesObjectString = JSON.stringify(sortedImagesObject);
-
-  //       // Create a textarea element to hold the sortedImagesObjectString
-  //       const textarea = document.createElement("textarea");
-  //       textarea.value = sortedImagesObjectString;
-  //       document.body.appendChild(textarea);
-
-  //       // Select the text in the textarea
-  //       textarea.select();
-  //       textarea.setSelectionRange(0, 99999);
-
-  //       // Copy the selected text to the clipboard
-  //       document.execCommand('copy');
-
-  //       // Remove the textarea element
-  //       document.body.removeChild(textarea);
-
-  //       // Alert that the object has been copied to the clipboard
-  //       alert("Sorted Images Object has been copied to the clipboard!");
-  //   });
-  // }
-
-  // calculateAllBrightness(); // Call the function to calculate all brightness values and create the copy button
+  // const imagePixelDivRef = useRef(null);
 
   var setup = function setup(p5) {
     p5.noCanvas();
@@ -958,49 +868,41 @@ var App = function App() {
     videoElem = video.elt;
     video.size(30, 30);
     video.hide();
-    pixelDiv = p5.createDiv();
+    imagePixelDiv = p5.createDiv();
+    imagePixelDiv.addClass('image-grid');
+    imagePixelDiv.attribute('ref', 'imagePixelDiv'); // Add this line to attach the ref to the div element
 
     // Create the promise and resolve it when the video element is ready
     videoPromise = new Promise(function (resolve, reject) {
       video.elt.onloadeddata = function () {
         resolve();
       };
-      video.elt.addEventListener('loadedmetadata', function () {
-        startVideo();
-      });
     });
-
-    // Create a pool of image elements
-    for (var i = 0; i < 100; i++) {
-      var img = document.createElement('img');
-      img.style.display = 'none';
-      pixelDiv.elt.appendChild(img);
-      emotionImagePool.push(img);
-    }
   };
-  var updateEmotion = function updateEmotion(expression) {
-    var highestEmotion = 'neutral';
-    var highestConfidence = 0;
-    for (var _i2 = 0, _Object$entries = Object.entries(expression); _i2 < _Object$entries.length; _i2++) {
-      var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2),
-        expressionName = _Object$entries$_i[0],
-        expressionValue = _Object$entries$_i[1];
-      if (expressionValue > highestConfidence) {
-        highestEmotion = expressionName;
-        highestConfidence = expressionValue;
-      }
-    }
-    currentEmotion = highestEmotion;
-    emotionConfidence = highestConfidence;
-    console.log(currentEmotion);
-    setShowVideo(true);
-  };
+  Promise.all([face_api_js__WEBPACK_IMPORTED_MODULE_1__.nets.tinyFaceDetector.loadFromUri('/models'), face_api_js__WEBPACK_IMPORTED_MODULE_1__.nets.faceLandmark68Net.loadFromUri('/models'), face_api_js__WEBPACK_IMPORTED_MODULE_1__.nets.faceRecognitionNet.loadFromUri('/models'), face_api_js__WEBPACK_IMPORTED_MODULE_1__.nets.faceExpressionNet.loadFromUri('/models')]).then(start);
+  function start() {
+    return _start.apply(this, arguments);
+  }
+  function _start() {
+    _start = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            _context.next = 2;
+            return videoPromise;
+          case 2:
+            startVideo();
+          case 3:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    return _start.apply(this, arguments);
+  }
   var draw = function draw(p5) {
-    if (!currentEmotion) {
-      return;
-    }
     video.loadPixels();
-    var len = _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion].length;
+    var imageGrid = "";
     for (var j = 0; j < video.height; j++) {
       for (var i = 0; i < video.width; i++) {
         var pixelIndex = (i + j * video.width) * 4;
@@ -1008,204 +910,94 @@ var App = function App() {
         var g = video.pixels[pixelIndex + 1];
         var b = video.pixels[pixelIndex + 2];
         var avg = (r + g + b) / 3;
+        var len = _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion].length;
         var charIndex = Math.floor(p5.map(avg, 0, 255, 0, len));
-        var imgElem = emotionImagePool[emotionImageIndex];
-        if (!imgElem) {
-          imgElem = new Image();
-          emotionImagePool[emotionImageIndex] = imgElem;
-        }
-        var img = imgElem.src || _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion][charIndex];
-        imgElem.src = img;
-        imgElem.style.display = '';
-        emotionImageIndex++;
-        pixelDiv.child(imgElem);
+        var _image = _emotionImages__WEBPACK_IMPORTED_MODULE_4__["default"][currentEmotion][charIndex];
+        imageGrid += "<img src=\"".concat(_image, "\">");
       }
-      emotionImageIndex++;
-      var lineBreak = document.createElement('br');
-      pixelDiv.child(lineBreak);
+      imageGrid += '<br/>';
     }
-    // Hide any remaining image elements in the pool
-    for (var _i3 = emotionImageIndex; _i3 < emotionImagePool.length; _i3++) {
-      emotionImagePool[_i3].style.display = 'none';
-    }
+    imagePixelDiv.html(imageGrid);
   };
   function startVideo() {
     return _startVideo.apply(this, arguments);
   }
   function _startVideo() {
-    _startVideo = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
-      var canvas, displaySize;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+    _startVideo = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
           case 0:
-            videoElem = document.getElementsByTagName('video')[0];
-            canvas = face_api_js__WEBPACK_IMPORTED_MODULE_1__.createCanvasFromMedia(videoElem);
-            document.body.append(canvas);
-            displaySize = {
-              width: videoElem.width,
-              height: videoElem.height
-            };
-            face_api_js__WEBPACK_IMPORTED_MODULE_1__.matchDimensions(canvas, displaySize);
-            setInterval( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-              var detections, resizedDetections, expression;
-              return _regeneratorRuntime().wrap(function _callee$(_context) {
-                while (1) switch (_context.prev = _context.next) {
-                  case 0:
-                    _context.next = 2;
-                    return face_api_js__WEBPACK_IMPORTED_MODULE_1__.detectAllFaces(videoElem, new face_api_js__WEBPACK_IMPORTED_MODULE_1__.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
-                  case 2:
-                    detections = _context.sent;
-                    resizedDetections = face_api_js__WEBPACK_IMPORTED_MODULE_1__.resizeResults(detections, displaySize); // get the highest scored expression
-                    if (resizedDetections.length > 0) {
-                      expression = resizedDetections[0].expressions;
-                      updateEmotion(expression);
+            _context3.next = 2;
+            return videoPromise;
+          case 2:
+            navigator.getUserMedia({
+              video: {
+                width: 320,
+                height: 240
+              }
+            }, function (stream) {
+              videoElem = document.getElementsByTagName('video')[0];
+              videoElem.srcObject = stream;
+              videoElem.onloadedmetadata = function (e) {
+                videoElem.play();
+              };
+              videoElem.addEventListener('loadedmetadata', function () {
+                var canvas = face_api_js__WEBPACK_IMPORTED_MODULE_1__.createCanvasFromMedia(videoElem);
+                document.body.append(canvas);
+                var displaySize = {
+                  width: videoElem.width,
+                  height: videoElem.height
+                };
+                face_api_js__WEBPACK_IMPORTED_MODULE_1__.matchDimensions(canvas, displaySize);
+                setInterval( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+                  var _resizedDetections$;
+                  var detections, resizedDetections, expression, _i2, _Object$entries, _Object$entries$_i, expressionName, expressionValue;
+                  return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+                    while (1) switch (_context2.prev = _context2.next) {
+                      case 0:
+                        _context2.next = 2;
+                        return face_api_js__WEBPACK_IMPORTED_MODULE_1__.detectAllFaces(videoElem, new face_api_js__WEBPACK_IMPORTED_MODULE_1__.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+                      case 2:
+                        detections = _context2.sent;
+                        resizedDetections = face_api_js__WEBPACK_IMPORTED_MODULE_1__.resizeResults(detections, displaySize); // get the highest scored expression
+                        expression = (_resizedDetections$ = resizedDetections[0]) === null || _resizedDetections$ === void 0 ? void 0 : _resizedDetections$.expressions;
+                        for (_i2 = 0, _Object$entries = Object.entries(expression); _i2 < _Object$entries.length; _i2++) {
+                          _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2), expressionName = _Object$entries$_i[0], expressionValue = _Object$entries$_i[1];
+                          if (expressionValue > emotionConfidence) {
+                            currentEmotion = expressionName;
+                            emotionConfidence = expressionValue;
+                          }
+                        }
+                        console.log(currentEmotion, emotionConfidence);
+                      case 7:
+                      case "end":
+                        return _context2.stop();
                     }
-                  case 5:
-                  case "end":
-                    return _context.stop();
-                }
-              }, _callee);
-            })), 100);
-          case 6:
+                  }, _callee2);
+                })), 500);
+              });
+            }, function (err) {
+              console.error("The following error occurred: ".concat(err.name));
+            });
+          case 3:
           case "end":
-            return _context2.stop();
+            return _context3.stop();
         }
-      }, _callee2);
+      }, _callee3);
     }));
     return _startVideo.apply(this, arguments);
   }
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    (0,_models_js__WEBPACK_IMPORTED_MODULE_3__.loadModels)().then(function () {
-      new p5__WEBPACK_IMPORTED_MODULE_2__(function (p) {
-        setup(p);
-        p.draw = function () {
-          return draw(p);
-        };
-      });
+    new p5__WEBPACK_IMPORTED_MODULE_2__(function (p) {
+      setup(p);
+      p.draw = function () {
+        return draw(p);
+      };
     });
-  }, []);
+  }, [isLoading]);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, isLoading ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_loader__WEBPACK_IMPORTED_MODULE_5__["default"], null) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (App);
-
-// const App = () => {
-//   let video = useRef(null);
-//   let pixelDiv;
-//   const VIDEO = p5.VIDEO;
-//   let currentEmotion = 'neutral';
-//   let emotionConfidence = 0;
-//   let videoElem;
-//   let videoPromise;
-//   let emotionImagePool = [];
-//   let emotionImageIndex = 0;
-
-//   const setup = p5 => {
-//     p5.noCanvas();
-//     video = p5.createCapture({ video: true, audio: false });
-//     videoElem = video.elt;
-//     video.size(30, 30);
-//     video.hide();
-//     pixelDiv = p5.createDiv();
-
-//     // Create the promise and resolve it when the video element is ready
-//     videoPromise = new Promise((resolve, reject) => {
-//       video.elt.onloadeddata = () => {
-//         resolve();
-//       };
-//       video.elt.addEventListener('loadedmetadata', () => {
-//         startVideo();
-//       });
-//     });
-
-//     // Create a pool of image elements
-//     for (let i = 0; i < 100; i++) {
-//       const img = document.createElement('img');
-//       img.style.display = 'none';
-//       pixelDiv.elt.appendChild(img);
-//       emotionImagePool.push(img);
-//     }
-//   };
-
-//   const updateEmotion = expression => {
-//     let highestEmotion = 'neutral';
-//     let highestConfidence = 0;
-//     for (const [expressionName, expressionValue] of Object.entries(expression)) {
-//       if (expressionValue > highestConfidence) {
-//         highestEmotion = expressionName;
-//         highestConfidence = expressionValue;
-//       }
-//     }
-//     currentEmotion = highestEmotion;
-//     emotionConfidence = highestConfidence;
-//     console.log(currentEmotion);
-//   };
-
-//   const draw = p5 => {
-//     video.loadPixels();
-//     const len = emotionImages[currentEmotion].length;
-//     for (let j = 0; j < video.height; j++) {
-//       for (let i = 0; i < video.width; i++) {
-//         const pixelIndex = (i + j * video.width) * 4;
-//         const r = video.pixels[pixelIndex + 0];
-//         const g = video.pixels[pixelIndex + 1];
-//         const b = video.pixels[pixelIndex + 2];
-//         const avg = (r + g + b) / 3;
-//         const charIndex = Math.floor(p5.map(avg, 0, 255, 0, len));
-//         let imgElem = emotionImagePool[emotionImageIndex];
-//         if (!imgElem) {
-//           imgElem = new Image();
-//           emotionImagePool[emotionImageIndex] = imgElem;
-//         }
-//         const img = imgElem.src || emotionImages[currentEmotion][charIndex];
-//         imgElem.src = img;
-//         imgElem.style.display = '';
-//         emotionImageIndex++;
-//         pixelDiv.child(imgElem);
-//       }
-//       emotionImageIndex++;
-//       const lineBreak = document.createElement('br');
-//       pixelDiv.child(lineBreak);
-//     }
-//     // Hide any remaining image elements in the pool
-//     for (let i = emotionImageIndex; i < emotionImagePool.length; i++) {
-//       emotionImagePool[i].style.display = 'none';
-//     }
-//   };
-
-//   async function startVideo() {
-//     videoElem = document.getElementsByTagName('video')[0];
-//     const canvas = faceapi.createCanvasFromMedia(videoElem);
-//     document.body.append(canvas);
-//     const displaySize = { width: videoElem.width, height: videoElem.height };
-//     faceapi.matchDimensions(canvas, displaySize);
-
-//     setInterval(async () => {
-//       const detections = await faceapi
-//         .detectAllFaces(videoElem, new faceapi.TinyFaceDetectorOptions())
-//         .withFaceLandmarks()
-//         .withFaceExpressions();
-//       const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-//       // get the highest scored expression
-//       if (resizedDetections.length > 0) {
-//         const expression = resizedDetections[0].expressions;
-//         updateEmotion(expression);
-//       }
-//     }, 100);
-//   }
-
-//   useEffect(() => {
-//     loadModels().then(() => {
-//       new p5(p => {
-//         setup(p)
-//         p.draw = () => draw(p)
-//       })
-//     })
-//   }, [])
-//   return <div/>
-// }
-
-// export default App
 
 /***/ }),
 
@@ -1242,17 +1034,125 @@ var emotionImages = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ LoadingPage)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(arr, i) { var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"]; if (null != _i) { var _s, _e, _x, _r, _arr = [], _n = !0, _d = !1; try { if (_x = (_i = _i.call(arr)).next, 0 === i) { if (Object(_i) !== _i) return; _n = !1; } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0); } catch (err) { _d = !0, _e = err; } finally { try { if (!_n && null != _i["return"] && (_r = _i["return"](), Object(_r) !== _r)) return; } finally { if (_d) throw _e; } } return _arr; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function LoadingPage() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "spinner-container"
+var LoadingPage = function LoadingPage() {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(Array(7).fill(false)),
+    _useState2 = _slicedToArray(_useState, 2),
+    dots = _useState2[0],
+    setDots = _useState2[1]; // Array of boolean values to track dot states
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState4 = _slicedToArray(_useState3, 2),
+    animationDone = _useState4[0],
+    setAnimationDone = _useState4[1]; // State variable to track if animation is done
+
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var counter = 0; // Counter to keep track of seconds
+
+    // Timer to update dot states
+    var timer = setInterval(function () {
+      setDots(function (prevDots) {
+        // Update the state of the current dot to true (filled) and increment the counter
+        var newDots = _toConsumableArray(prevDots);
+        if (counter <= 7) {
+          newDots[counter] = true;
+          counter += 1;
+        }
+
+        // If all dots are filled, clear the interval and set animationDone to true
+        if (counter === 8) {
+          clearInterval(timer);
+          setAnimationDone(true);
+        }
+        return newDots;
+      });
+    }, 1000); // 1 second in milliseconds
+
+    // Clean up the timer on component unmount
+    return function () {
+      clearInterval(timer);
+    };
+  }, []);
+
+  // Conditionally render the loading page based on animationDone state
+  return !animationDone ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "loading-page"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "loading-spinner"
-  }));
-}
+    className: "loading-container_text"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("h1", null, "Human Emotion v2"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("p", null, "face scanning in progress...")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "loading-dots_container"
+  }, dots.map(function (isFilled, index) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+      key: index,
+      className: "loading-dot ".concat(isFilled ? 'loading-dot-fill' : '')
+    });
+  }))) : null;
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (LoadingPage);
+
+// Prev
+
+// import React, {useState, useEffect} from 'react';
+
+// const LoadingPage = () => {
+//   const [dots, setDots] = useState(Array(7).fill(false)); // Array of boolean values to track dot states
+
+//   useEffect(() => {
+//     let counter = 0; // Counter to keep track of seconds
+
+//     // Timer to update dot states
+//     const timer = setInterval(() => {
+//       setDots(prevDots => {
+//         // Update the state of the current dot to true (filled) and increment the counter
+//         const newDots = [...prevDots];
+//         newDots[counter] = true;
+//         counter += 1;
+
+//         // If all dots are filled, clear the interval
+//         if (counter === 7) {
+//           clearInterval(timer);
+//         }
+//         return newDots;
+//       });
+//     }, 1000); // 1 second in milliseconds
+
+//     // Clean up the timer on component unmount
+//     return () => {
+//       clearInterval(timer);
+//     };
+//   }, []);
+
+//   return (
+//     <div className="loading-page">
+//       <div className="loading-container_text">
+//         <h1>Human Emotion v2</h1>
+//         <p>face scanning in progress...</p>
+//       </div>
+//       <div className="loading-dots_container">
+//         {dots.map((isFilled, index) => (
+//           <div
+//             key={index}
+//             className={`loading-dot ${isFilled ? 'loading-dot-fill' : ''}`}
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default LoadingPage;
 
 /***/ }),
 

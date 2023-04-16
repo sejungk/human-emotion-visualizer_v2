@@ -4,106 +4,18 @@ import * as p5 from 'p5';
 import {loadModels} from './models.js';
 import emotionImages from './emotionImages';
 import LoadingPage from "./loader";
-document.cookie = 'cookieName=cookieValue; SameSite=None; Secure';
+
+let video = document.getElementById('video');
+const image = document.getElementById('emotion-image');
+let currentEmotion = 'neutral';
+let emotionConfidence = 0;
+let imagePixelDiv;
+let videoElem;
+let videoPromise;
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [showVideo, setShowVideo] = useState(false);
-  let video = useRef(null);
-  let pixelDiv;
-  const VIDEO = p5.VIDEO;
-  let currentEmotion = '';
-  let emotionConfidence = 0;
-  let videoElem;
-  let videoPromise;
-  let emotionImagePool = [];
-  let emotionImageIndex = 0;
-
-  // async function calculateBrightness(imageSrc) {
-  //   return new Promise(resolve => {
-  //     const url = imageSrc;
-  //     const corsImageModified = new Image();
-  //     corsImageModified.crossOrigin = "Anonymous";
-  //     corsImageModified.src = url + "?not-from-cache-please";
-  //     corsImageModified.onload = function() {
-  //       const canvas = document.createElement("canvas");
-  //       canvas.width = this.width;
-  //       canvas.height = this.height;
-  //       const ctx = canvas.getContext("2d");
-  //       ctx.drawImage(this, 0, 0);
-
-  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  //       const data = imageData.data;
-  //       let r, g, b, avg;
-  //       let colorSum = 0;
-
-  //       for(let x=0, len=data.length; x<len; x+=4) {
-  //         r = data[x];
-  //         g = data[x+1];
-  //         b = data[x+2];
-  //         avg = Math.floor((r+g+b) / 3);
-  //         colorSum += avg;
-  //       }
-
-  //       const brightness = Math.floor(colorSum / (this.width * this.height));
-  //       resolve(brightness);
-  //     };
-  //   });
-  // }
-
-  // async function calculateAllBrightness() {
-  //   const sortedImagesObject = {}; // Create an empty object to store sorted arrays
-
-
-  //   for (const emotion in emotionImages) {
-  //     const images = emotionImages[emotion];
-  //     const sortedImages = await Promise.all(images.map(async (url) => {
-  //       const brightness = await calculateBrightness(url);
-  //       return { url, brightness };
-  //     })).then((result) => {
-  //       // Sort the images array based on brightness, from dark to light
-  //       result.sort((a, b) => a.brightness - b.brightness);
-  //       return result;
-  //     });
-
-  //     sortedImagesObject[emotion] = sortedImages
-  //       .filter(image => image.url.includes(emotion))
-  //       .map(image => image.url); // Update the filtered array to only contain image URLs
-
-  //     console.log(`Images for emotion "${emotion}" sorted by brightness:`);
-  //     console.log(sortedImages);
-  //   }
-
-  //   const copyButton = document.createElement("button");
-  //   copyButton.textContent = "Copy Sorted Images Object";
-  //   document.body.appendChild(copyButton);
-
-  //   copyButton.addEventListener("click", function() {
-  //       // Convert the sortedImagesObject to a string
-  //       const sortedImagesObjectString = JSON.stringify(sortedImagesObject);
-
-  //       // Create a textarea element to hold the sortedImagesObjectString
-  //       const textarea = document.createElement("textarea");
-  //       textarea.value = sortedImagesObjectString;
-  //       document.body.appendChild(textarea);
-
-  //       // Select the text in the textarea
-  //       textarea.select();
-  //       textarea.setSelectionRange(0, 99999);
-
-  //       // Copy the selected text to the clipboard
-  //       document.execCommand('copy');
-
-  //       // Remove the textarea element
-  //       document.body.removeChild(textarea);
-
-  //       // Alert that the object has been copied to the clipboard
-  //       alert("Sorted Images Object has been copied to the clipboard!");
-  //   });
-  // }
-
-  // calculateAllBrightness(); // Call the function to calculate all brightness values and create the copy button
-
+  // const imagePixelDivRef = useRef(null);
 
   const setup = p5 => {
     p5.noCanvas();
@@ -111,49 +23,33 @@ const App = () => {
     videoElem = video.elt;
     video.size(30, 30);
     video.hide();
-    pixelDiv = p5.createDiv();
+    imagePixelDiv = p5.createDiv();
+    imagePixelDiv.addClass('image-grid');
+    imagePixelDiv.attribute('ref', 'imagePixelDiv'); // Add this line to attach the ref to the div element
 
-    // Create the promise and resolve it when the video element is ready
-    videoPromise = new Promise((resolve, reject) => {
-      video.elt.onloadeddata = () => {
-        resolve();
-      };
-      video.elt.addEventListener('loadedmetadata', () => {
-        startVideo();
-      });
-    });
+   // Create the promise and resolve it when the video element is ready
+   videoPromise = new Promise((resolve, reject) => {
+    video.elt.onloadeddata = () => {
+      resolve();
+    };
+  });
+}
 
-    // Create a pool of image elements
-    for (let i = 0; i < 100; i++) {
-      const img = document.createElement('img');
-      img.style.display = 'none';
-      pixelDiv.elt.appendChild(img);
-      emotionImagePool.push(img);
-    }
-  };
+Promise.all([
+  faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+  faceapi.nets.faceExpressionNet.loadFromUri('/models')
+]).then(start)
 
-  const updateEmotion = expression => {
-    let highestEmotion = 'neutral';
-    let highestConfidence = 0;
-    for (const [expressionName, expressionValue] of Object.entries(expression)) {
-      if (expressionValue > highestConfidence) {
-        highestEmotion = expressionName;
-        highestConfidence = expressionValue;
-      }
-    }
-    currentEmotion = highestEmotion;
-    emotionConfidence = highestConfidence;
-    console.log(currentEmotion);
-    setShowVideo(true);
-  };
+  async function start() {
+    await videoPromise;
+    startVideo();
+  }
 
   const draw = p5 => {
-    if (!currentEmotion) {
-      return;
-    }
-
     video.loadPixels();
-    const len = emotionImages[currentEmotion].length;
+    let imageGrid = "";
     for (let j = 0; j < video.height; j++) {
       for (let i = 0; i < video.width; i++) {
         const pixelIndex = (i + j * video.width) * 4;
@@ -161,58 +57,64 @@ const App = () => {
         const g = video.pixels[pixelIndex + 1];
         const b = video.pixels[pixelIndex + 2];
         const avg = (r + g + b) / 3;
+        const len = emotionImages[currentEmotion].length;
         const charIndex = Math.floor(p5.map(avg, 0, 255, 0, len));
-        let imgElem = emotionImagePool[emotionImageIndex];
-        if (!imgElem) {
-          imgElem = new Image();
-          emotionImagePool[emotionImageIndex] = imgElem;
-        }
-        const img = imgElem.src || emotionImages[currentEmotion][charIndex];
-        imgElem.src = img;
-        imgElem.style.display = '';
-        emotionImageIndex++;
-        pixelDiv.child(imgElem);
+        const image = emotionImages[currentEmotion][charIndex];
+        imageGrid += `<img src="${image}">`;
       }
-      emotionImageIndex++;
-      const lineBreak = document.createElement('br');
-      pixelDiv.child(lineBreak);
+      imageGrid += '<br/>';
     }
-    // Hide any remaining image elements in the pool
-    for (let i = emotionImageIndex; i < emotionImagePool.length; i++) {
-      emotionImagePool[i].style.display = 'none';
-    }
-  };
+    imagePixelDiv.html(imageGrid);
+}
 
-  async function startVideo() {
+async function startVideo() {
+  await videoPromise;
+  navigator.getUserMedia({
+    video: { width: 320, height: 240 }
+  },
+  (stream) => {
     videoElem = document.getElementsByTagName('video')[0];
-    const canvas = faceapi.createCanvasFromMedia(videoElem);
-    document.body.append(canvas);
-    const displaySize = { width: videoElem.width, height: videoElem.height };
-    faceapi.matchDimensions(canvas, displaySize);
+    videoElem.srcObject = stream;
+    videoElem.onloadedmetadata = (e) => {
+      videoElem.play();
+    };
 
-    setInterval(async () => {
-      const detections = await faceapi
-        .detectAllFaces(videoElem, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceExpressions();
-      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+      videoElem.addEventListener('loadedmetadata', () => {
+        const canvas = faceapi.createCanvasFromMedia(videoElem);
+        document.body.append(canvas);
+        const displaySize = { width: videoElem.width, height: videoElem.height };
+        faceapi.matchDimensions(canvas, displaySize);
 
-      // get the highest scored expression
-      if (resizedDetections.length > 0) {
-        const expression = resizedDetections[0].expressions;
-        updateEmotion(expression);
-      }
-    }, 100);
-  }
+        setInterval(async () => {
+          const detections = await faceapi.detectAllFaces(videoElem, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+          const resizedDetections = faceapi.resizeResults(detections, displaySize);
+
+          // get the highest scored expression
+          const expression = resizedDetections[0]?.expressions;
+
+          for (const [expressionName, expressionValue] of Object.entries(expression)) {
+            if (expressionValue > emotionConfidence) {
+              currentEmotion = expressionName;
+              emotionConfidence = expressionValue;
+            }
+          }
+          console.log(currentEmotion, emotionConfidence);
+        }, 500)
+      });
+    },
+    (err) => {
+      console.error(`The following error occurred: ${err.name}`);
+    }
+  );
+}
 
   useEffect(() => {
-    loadModels().then(() => {
       new p5(p => {
         setup(p)
         p.draw = () => draw(p)
       })
-    })
-  }, [])
+    }, [isLoading]);
+
   return  (
     <>
      {isLoading ? <LoadingPage /> : <div></div>}
@@ -221,124 +123,3 @@ const App = () => {
 }
 
 export default App
-
-
-
-// const App = () => {
-//   let video = useRef(null);
-//   let pixelDiv;
-//   const VIDEO = p5.VIDEO;
-//   let currentEmotion = 'neutral';
-//   let emotionConfidence = 0;
-//   let videoElem;
-//   let videoPromise;
-//   let emotionImagePool = [];
-//   let emotionImageIndex = 0;
-
-//   const setup = p5 => {
-//     p5.noCanvas();
-//     video = p5.createCapture({ video: true, audio: false });
-//     videoElem = video.elt;
-//     video.size(30, 30);
-//     video.hide();
-//     pixelDiv = p5.createDiv();
-
-//     // Create the promise and resolve it when the video element is ready
-//     videoPromise = new Promise((resolve, reject) => {
-//       video.elt.onloadeddata = () => {
-//         resolve();
-//       };
-//       video.elt.addEventListener('loadedmetadata', () => {
-//         startVideo();
-//       });
-//     });
-
-//     // Create a pool of image elements
-//     for (let i = 0; i < 100; i++) {
-//       const img = document.createElement('img');
-//       img.style.display = 'none';
-//       pixelDiv.elt.appendChild(img);
-//       emotionImagePool.push(img);
-//     }
-//   };
-
-//   const updateEmotion = expression => {
-//     let highestEmotion = 'neutral';
-//     let highestConfidence = 0;
-//     for (const [expressionName, expressionValue] of Object.entries(expression)) {
-//       if (expressionValue > highestConfidence) {
-//         highestEmotion = expressionName;
-//         highestConfidence = expressionValue;
-//       }
-//     }
-//     currentEmotion = highestEmotion;
-//     emotionConfidence = highestConfidence;
-//     console.log(currentEmotion);
-//   };
-
-//   const draw = p5 => {
-//     video.loadPixels();
-//     const len = emotionImages[currentEmotion].length;
-//     for (let j = 0; j < video.height; j++) {
-//       for (let i = 0; i < video.width; i++) {
-//         const pixelIndex = (i + j * video.width) * 4;
-//         const r = video.pixels[pixelIndex + 0];
-//         const g = video.pixels[pixelIndex + 1];
-//         const b = video.pixels[pixelIndex + 2];
-//         const avg = (r + g + b) / 3;
-//         const charIndex = Math.floor(p5.map(avg, 0, 255, 0, len));
-//         let imgElem = emotionImagePool[emotionImageIndex];
-//         if (!imgElem) {
-//           imgElem = new Image();
-//           emotionImagePool[emotionImageIndex] = imgElem;
-//         }
-//         const img = imgElem.src || emotionImages[currentEmotion][charIndex];
-//         imgElem.src = img;
-//         imgElem.style.display = '';
-//         emotionImageIndex++;
-//         pixelDiv.child(imgElem);
-//       }
-//       emotionImageIndex++;
-//       const lineBreak = document.createElement('br');
-//       pixelDiv.child(lineBreak);
-//     }
-//     // Hide any remaining image elements in the pool
-//     for (let i = emotionImageIndex; i < emotionImagePool.length; i++) {
-//       emotionImagePool[i].style.display = 'none';
-//     }
-//   };
-
-//   async function startVideo() {
-//     videoElem = document.getElementsByTagName('video')[0];
-//     const canvas = faceapi.createCanvasFromMedia(videoElem);
-//     document.body.append(canvas);
-//     const displaySize = { width: videoElem.width, height: videoElem.height };
-//     faceapi.matchDimensions(canvas, displaySize);
-
-//     setInterval(async () => {
-//       const detections = await faceapi
-//         .detectAllFaces(videoElem, new faceapi.TinyFaceDetectorOptions())
-//         .withFaceLandmarks()
-//         .withFaceExpressions();
-//       const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-//       // get the highest scored expression
-//       if (resizedDetections.length > 0) {
-//         const expression = resizedDetections[0].expressions;
-//         updateEmotion(expression);
-//       }
-//     }, 100);
-//   }
-
-//   useEffect(() => {
-//     loadModels().then(() => {
-//       new p5(p => {
-//         setup(p)
-//         p.draw = () => draw(p)
-//       })
-//     })
-//   }, [])
-//   return <div/>
-// }
-
-// export default App

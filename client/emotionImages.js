@@ -437,5 +437,4 @@ const emotionImages = {
   ]
 }
 
-
-export default emotionImages;
+export default emotionImages
