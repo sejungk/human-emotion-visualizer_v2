@@ -86,7 +86,7 @@ canvas {
 }
 
 .loading-dot-fill {
-  background-image: url('images/emotion-icons/angry.png'); /* Image to be displayed on filled dots */
+  background-image: url('images/emotion-icons/neutral.png'); /* Image to be displayed on filled dots */
   background-size: cover;
   background-color: transparent;
   animation-name: dot-fill-animation;
@@ -97,7 +97,7 @@ canvas {
     background-color: #fff; /* Initial background color for dots */
   }
   to {
-    background-image: url('images/emotion-icons/angry.png'); /* Image to be displayed on filled dots */
+    background-image: url('images/emotion-icons/neutral.png'); /* Image to be displayed on filled dots */
     background-size: cover;
     background-color: transparent;
   }
@@ -106,5 +106,5 @@ canvas {
 .loading-page {
   background-color: #000;
   width: 110vw;
-  height: 110vh;
+  height: 100vh;
 }
